@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#194d38">
+  <title>PayPilot | Accounts Payable Control Center</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="#">
+      <span class="brand-mark">P</span>
+      <span class="brand-copy">
+        <strong>PayPilot</strong>
+        <small>FINANCE OPERATIONS</small>
+      </span>
+    </a>
+
+    <div class="sidebar-label">WORKSPACE</div>
+    <nav class="navigation">
+      <button class="nav-link active" data-view="overview">Overview</button>
+      <button class="nav-link" data-view="invoices">Invoice register</button>
+      <button class="nav-link" data-view="decisions">Payment decisions</button>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <span class="online-indicator"></span>
+      <span>Local environment</span>
+      <small id="connectionLabel">Checking connection</small>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">FINANCE / ACCOUNTS PAYABLE</div>
+        <h1 id="pageTitle">Finance overview</h1>
+        <p class="subtitle">Invoice monitoring, purchase order matching and payment control.</p>
+      </div>
+      <div class="top-actions">
+        <span class="date-label" id="currentDate"></span>
+        <button class="button button-primary" id="refreshBtn">Refresh data</button>
+      </div>
+    </header>
+
+    <div id="notice" class="notice" hidden></div>
+
+    <section class="overview-section" id="overviewSection">
+      <div class="section-heading">
+        <div>
+          <h2>Overview</h2>
+          <p>A consolidated view of your accounts payable records.</p>
+        </div>
+        <span class="source-label">SOURCE: AP_ERP</span>
+      </div>
+
+      <div class="metrics">
+        <article class="metric-card">
+          <div class="metric-label">Total invoices</div>
+          <div class="metric-value" id="totalInvoices">—</div>
+          <div class="metric-note">Invoice records tracked</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">Total invoice value</div>
+          <div class="metric-value metric-money" id="totalValue">—</div>
+          <div class="metric-note">Total recorded value</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">Paid invoices</div>
+          <div class="metric-value" id="paidInvoices">—</div>
+          <div class="metric-note">Marked as paid</div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-label">Requires review</div>
+          <div class="metric-value" id="reviewInvoices">—</div>
+          <div class="metric-note">Pay and hold decisions</div>
+        </article>
+      </div>
+
+      <div class="overview-grid">
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Decision summary</h2>
+              <p>Current payment recommendations</p>
+            </div>
+          </div>
+          <div class="decision-list">
+            <div class="decision-row">
+              <span class="decision-symbol paid-symbol"></span>
+              <span class="decision-name">Already paid</span>
+              <strong id="alreadyPaidCount">—</strong>
+            </div>
+            <div class="decision-row">
+              <span class="decision-symbol pay-symbol"></span>
+              <span class="decision-name">Recommended to pay</span>
+              <strong id="payCount">—</strong>
+            </div>
+            <div class="decision-row">
+              <span class="decision-symbol hold-symbol"></span>
+              <span class="decision-name">On hold</span>
+              <strong id="holdCount">—</strong>
+            </div>
+            <div class="decision-row">
+              <span class="decision-symbol pending-symbol"></span>
+              <span class="decision-name">No decision recorded</span>
+              <strong id="noDecisionCount">—</strong>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Control summary</h2>
+              <p>Invoice matching and risk indicators</p>
+            </div>
+          </div>
+          <div class="control-stats">
+            <div>
+              <span>PO matched</span>
+              <strong id="matchedCount">—</strong>
+            </div>
+            <div>
+              <span>PO mismatches</span>
+              <strong id="mismatchCount">—</strong>
+            </div>
+            <div>
+              <span>High risk</span>
+              <strong id="highRiskCount">—</strong>
+            </div>
+            <div>
+              <span>Unpaid invoice value</span>
+              <strong id="unpaidValue">—</strong>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section class="panel invoice-panel" id="invoicePanel">
+      <div class="panel-header invoice-panel-header">
+        <div>
+          <h2 id="tableTitle">Invoice register</h2>
+          <p id="tableSubtitle">Review vendor invoices and payment decisions.</p>
+        </div>
+        <div class="table-actions">
+          <input id="searchInput" type="search" placeholder="Search invoice or vendor">
+          <select id="statusFilter" aria-label="Filter by invoice status">
+            <option value="">All statuses</option>
+            <option value="PAID">Paid</option>
+            <option value="UNPAID">Unpaid</option>
+          </select>
+          <select id="decisionFilter" aria-label="Filter by decision">
+            <option value="">All decisions</option>
+            <option value="ALREADY PAID">Already paid</option>
+            <option value="PAY">Pay</option>
+            <option value="HOLD">Hold</option>
+            <option value="NONE">No decision</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>INVOICE / VENDOR</th>
+              <th>INVOICE DATE</th>
+              <th class="align-right">AMOUNT</th>
+              <th>STATUS</th>
+              <th>PO MATCH</th>
+              <th>DECISION</th>
+              <th>RISK</th>
+            </tr>
+          </thead>
+          <tbody id="invoiceRows">
+            <tr><td colspan="7" class="empty-state">Loading invoice records…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span id="recordCount">Loading records</span>
+        <span>Live database records</span>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>PayPilot · Accounts Payable Control Center</span>
+      <span>Local development · <span id="lastUpdated">Not refreshed yet</span></span>
+    </footer>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
